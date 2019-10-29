@@ -7,6 +7,4 @@ Screens:
 - Navigation
 
 Screenshots is included for reference
-
-Todo:
-- integrate with native photo library  
+ 
