@@ -6,15 +6,9 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import {
-  Text,
-  Input,
-  withStyles,
-  Avatar,
-  Button,
-} from 'react-native-ui-kitten';
+import {Text, Input, withStyles, Avatar, Button} from 'react-native-ui-kitten';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-// import ImagePicker from 'react-native-image-picker';
+import ImagePicker from 'react-native-image-picker';
 
 class _AddItem extends React.Component {
   static navigationOptions = {
@@ -28,6 +22,7 @@ class _AddItem extends React.Component {
     startTime: '',
     duration: '',
     date: '', //new Date(),
+    imgSource: '',
   };
 
   onNameInputChanged = text => {
@@ -50,12 +45,35 @@ class _AddItem extends React.Component {
     this.setState({duration: text});
   };
 
-  state = {
-    date: new Date(),
-  };
+  showImagePicker = () => {
+    const options = {
+      title: 'Select Image',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    };
 
-  onSelect = date => {
-    this.setState({date});
+    ImagePicker.showImagePicker(options, response => {
+      console.log('Response = ', response);
+
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+      } else {
+        const source = {uri: response.uri};
+
+        // You can also display the image using data:
+        // const source = { uri: 'data:image/jpeg;base64,' + response.data };
+
+        this.setState({
+          imgSource: source,
+        });
+      }
+    });
   };
 
   render = () => {
@@ -129,12 +147,22 @@ class _AddItem extends React.Component {
           </View>
 
           <View style={themedStyle.row}>
-            <TouchableOpacity style={this.props.themedStyle.imageBtn}> 
-              <Image
-                style={this.props.themedStyle.image}
-                source={require('../assets/images/upload.png')}
-                resizeMode="contain"
-              />
+            <TouchableOpacity
+              style={this.props.themedStyle.imageBtn}
+              onPress={this.showImagePicker}>
+              {this.state.imgSource ? (
+                <Image
+                  source={this.state.imgSource}
+                  style={this.props.themedStyle.image}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Image
+                  style={this.props.themedStyle.image}
+                  source={require('../assets/images/upload.png')}
+                  resizeMode="contain"
+                />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -184,6 +212,10 @@ export default AddItem = withStyles(_AddItem, theme => ({
   imageBtn: {
     alignItems: 'center',
     marginVertical: 5,
+    width: '100%',
+  },
+  image:{
+    height: 200,
     width: '100%'
   }
 }));
